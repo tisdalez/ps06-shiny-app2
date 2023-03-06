@@ -1,1 +1,1 @@
-# ps06-shiny-app2
+# ps06-shiny-app

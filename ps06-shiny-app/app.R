@@ -28,11 +28,20 @@ ui <- fluidPage(
                  that point"),
                em("I am not sure about how recent the data needs to be."),
                h1("What does this application do?"),
-               p("The plot plots a sample from 1000 to 100000 crime reports, of
-               the ", nrow(crime), " reports in the dataset. The plot charts how
+               p("The plot plots a sample from 1000 to ", nrow(crime), " reports, or all
+               of the reports in the dataset. The plot charts how
                many of the reports there are from each year, letting you
-               get a good of the distribution. without  The table
-                 lets the user look through ")),
+               get a good of the distribution. without having to look at all the
+               data if you prefer."),
+               p(("There are "), nrow(crime), " rows of data and ", ncol(crime),
+               "collumns of data. IN the dataset, the ranking of who the the crime
+               was against is as follows,
+               PROPERTY,
+               PERSON,
+               SOCIETY,
+               NOT_A_CRIME",
+               "I wasn't able to calculate this data on this document but a the 
+               project information document that will be in the github file")),
       
       tabPanel("Plot",sidebarPanel(
         sliderInput("n", "How many reports of crime:",
@@ -52,7 +61,7 @@ ui <- fluidPage(
                  sidebarPanel(
                    checkboxGroupInput("show_vars", "Columns in the Crime Data to show:",
                                       names(crime), selected = names(crime))
-                 ),mainPanel(DT::dataTableOutput("table"))))
+                 ),mainPanel(DT::dataTableOutput("table"),textOutput("textSummary2"))))
     )
   )
 )
@@ -93,11 +102,32 @@ server <- function(input, output) {
     output$textSummary1 <- renderText({
       paste("Currently you have selected ", as.character(input$n), " reports. In the reports that 
          and that is ", as.character(signif(input$n/nrow(crime) * 100),digits = 3),"% of the reports 
-            in the dataset" 
+            in the dataset, also the data above shows that there is almost no crime in 2023 as 
+            the year is not finished, thus there hasn't been enough data. The data above represents
+            the yearly crime rate if you were unaware, and it it displays the amount that was found
+            in that year in the selected sample. I made it so that changing the colors resets the 
+            graph, so you don't have to click the slider again if you want to changet the sample 
+            but not the sample amount." 
             )
     })
-  
+    
+    output$textSummary2 <- renderText({
+      paste("Of the data types that you have selected, the number of rows that have
+      no values in them or in other words have NA in them is ",
+            as.character(nrow(crime) - crime %>% 
+                                         select(input$show_vars) %>% 
+                                         na.omit() %>% 
+                                         nrow()),
+            "The data in the table above was reduced from a previous amount because
+            it was too large. The difference between a report number and an offense
+            ID is that a report number contains the year, whereas an offense ID is
+            wholy unique to each report, so it is useful when searching ignoring year." 
+            )
+    })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
+#this took like 10 hours perhaps
+
